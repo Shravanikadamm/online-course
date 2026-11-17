@@ -4,12 +4,12 @@ from . import views
 
 urlpatterns = [
     path(
-        'course/<int:course_id>/submit/',
+        '<int:course_id>/submit/',
         views.submit,
         name='submit'
     ),
     path(
-        'exam-result/<int:submission_id>/',
+        '<int:course_id>/exam_result/<int:submission_id>/',
         views.show_exam_result,
         name='show_exam_result'
     ),
