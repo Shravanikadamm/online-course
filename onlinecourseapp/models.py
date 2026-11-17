@@ -21,6 +21,24 @@ class Lesson(models.Model):
         return self.title
 
 
+class Instructor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_time = models.BooleanField(default=True)
+    total_learners = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.username
+
+
+class Learner(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    occupation = models.CharField(max_length=100, blank=True)
+    social_link = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class Question(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=500)
