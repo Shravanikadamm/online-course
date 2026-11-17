@@ -39,6 +39,15 @@ class Learner(models.Model):
         return self.user.username
 
 
+class Enrollment(models.Model):
+    learner = models.ForeignKey(Learner, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    date_enrolled = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.learner.user.username} - {self.course.name}"
+
+
 class Question(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     question_text = models.CharField(max_length=500)
@@ -59,6 +68,11 @@ class Choice(models.Model):
 class Submission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enrollment = models.ForeignKey(
+        Enrollment, on_delete=models.CASCADE,
+        null=True, blank=True, related_name='submissions'
+    )
+    choices = models.ManyToManyField(Choice, blank=True)
     score = models.IntegerField(default=0)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
