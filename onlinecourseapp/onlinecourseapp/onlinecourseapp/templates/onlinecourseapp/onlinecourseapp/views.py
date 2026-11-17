@@ -1,8 +1,14 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import Course, Question, Choice, Submission, Learner, Enrollment
+from .models import (
+    Course,
+    Question,
+    Choice,
+    Submission,
+    Learner,
+    Enrollment
+)
 
 
 @login_required
@@ -37,7 +43,7 @@ def submit(request, course_id):
                 selected_choices.append(selected_choice)
 
                 if selected_choice.is_correct:
-                    score += 1
+                    score += question.grade
 
         submission = Submission.objects.create(
             user=request.user,
@@ -80,9 +86,21 @@ def show_exam_result(request, course_id, submission_id):
     )
 
     total_questions = Question.objects.filter(course=course).count()
+
+    selected_choices = submission.choices.all()
+
+    selected_choice_ids = list(
+        selected_choices.values_list('id', flat=True)
+    )
+
     score = sum(
-        1 for choice in submission.choices.all()
-        if choice.is_correct
+        question.grade
+        for question in Question.objects.filter(course=course)
+        if question.is_get_score(
+            selected_choices.filter(question=question).values_list(
+                'id', flat=True
+            )
+        )
     )
 
     submission.score = score
@@ -95,10 +113,12 @@ def show_exam_result(request, course_id, submission_id):
             'course': course,
             'submission': submission,
             'score': score,
+            'grade': score,
             'total_questions': total_questions,
             'percentage': (
                 round(score / total_questions * 100)
                 if total_questions else 0
-            )
+            ),
+            'selected_choice_ids': selected_choice_ids
         }
     )
